@@ -1,21 +1,90 @@
-apply plugin: 'maven-publish'
+import java.text.SimpleDateFormat
 
+plugins {
+    id "com.jfrog.bintray" version "1.1"
+}
+
+def currentVersion = "0.0.1-SNAPSHOT"
 
 allprojects { project ->
     group = 'name.benjaminAbbitt'
-    version = '0.0.1-SNAPSHOT'
+    version = new Version(currentVersion)
+
+    apply plugin: 'com.jfrog.bintray'
+
+    bintray {
+        user = bintray_user
+        key = bintray_api_key
+
+        configurations = ['archives']
+        dryRun = false
+        publish = true
+        pkg {
+            repo = 'maven'
+            name = 'cqrs-es'
+            desc = 'A CQRS/ES learning experience.'
+            websiteUrl = 'https://github.com/benjaminabbitt/cqrs-es'
+            issueTrackerUrl = 'https://github.com/benjaminabbitt/cqrs-es/issues'
+            vcsUrl = 'https://github.com/benjaminabbitt/cqrs-es.git'
+            licenses = ['Apache-2.0']
+            labels = ['gradle', 'bintray']
+            publicDownloadNumbers = false
+        }
+    }
 }
 
 subprojects { subProject ->
     apply plugin: 'java'
+
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+
     ext {
         jooqVersion = "3.5.1"
     }
+
     repositories {
         jcenter()
     }
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+        classifier "sources"
+    }
+
+    artifacts {
+        archives sourceJar
+    }
+
+
 }
 
+class Version {
+    String originalVersion
+    String thisVersion
+    String status
+    Date buildTime
 
+    Version(String versionValue) {
+        buildTime = new Date()
+        originalVersion = versionValue
+        if (originalVersion.contains('-SNAPSHOT')) {
+            status = 'integration'
+            thisVersion = originalVersion.replace('SNAPSHOT', getTimestamp())
+        } else {
+            status = 'release'
+            thisVersion = versionValue
+        }
+    }
+
+    String getTimestamp() {
+        // Convert local file timestamp to UTC
+        def format = new SimpleDateFormat('yyyyMMddHHmmss')
+        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')));
+        return format.format(buildTime)
+    }
+
+    String toString() {
+        thisVersion
+    }
+}

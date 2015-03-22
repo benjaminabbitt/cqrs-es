@@ -1,6 +1,7 @@
 # Created by https://www.gitignore.io
 
 .DS_Store
+gradle.properties
 
 ### Gradle ###
 .gradle
