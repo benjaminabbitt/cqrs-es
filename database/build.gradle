@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.postgresql:postgresql:9.3-1102-jdbc41'
+        classpath "org.jooq:jooq-codegen:$jooqVersion"
+    }
+}
+
+apply plugin: 'java'
+
+jar{
+    classifier 'postgresql'
+}
+
+dependencies {
+    compile "org.jooq:jooq:$jooqVersion"
+    compile 'javax.persistence:persistence-api:1.0'
+    compile 'javax.validation:validation-api:1.1.0.Final'
+    compile 'org.hibernate:hibernate-validator:5.0.1.Final'
+}
+
+
+
+task generateJooq  << {
+    def writer = new StringWriter()
+    def xml = new groovy.xml.MarkupBuilder(writer)
+            .configuration('xmlns': 'http://www.jooq.org/xsd/jooq-codegen-3.5.0.xsd') {
+        jdbc() {
+            driver('org.postgresql.Driver')
+            url(databaseUrl)
+            user(databaseUser)
+            password(databasePassword)
+        }
+        generator() {
+            database() {
+                inputSchema('public')
+            }
+            generate() {
+            }
+            target() {
+                packageName('name.benjaminAbbitt.cqrs.generated.jooq')
+                directory(project.projectDir.toString() + '/src/main/java')
+            }
+        }
+    }
+
+// Run the code generator
+// ----------------------
+    org.jooq.util.GenerationTool.main(
+            javax.xml.bind.JAXB.unmarshal(new StringReader(writer.toString()), org.jooq.util.jaxb.Configuration.class)
+    )
+}
+
+

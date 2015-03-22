@@ -1,0 +1,21 @@
+apply plugin: 'maven-publish'
+
+
+allprojects { project ->
+    group = 'name.benjaminAbbitt'
+    version = '0.0.1-SNAPSHOT'
+}
+
+subprojects { subProject ->
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    ext {
+        jooqVersion = "3.5.1"
+    }
+    repositories {
+        jcenter()
+    }
+}
+
+

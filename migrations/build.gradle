@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.flywaydb:flyway-gradle-plugin:3.1'
+        classpath 'org.postgresql:postgresql:9.3-1102-jdbc41'
+
+    }
+}
+
+apply plugin: 'flyway'
+apply plugin: 'java'
+
+flyway {
+    url = databaseUrl
+    user =  databaseUser
+    password = databasePassword
+    schemas = ['public']
+
+    cleanOnValidationError true
+    validateOnMigrate true
+}
+
+
+
+
+
